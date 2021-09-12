@@ -1,6 +1,3 @@
-# lens-app-viewer
-Application Viewer For Lens Ide
-
 # What is App Viewer?
 An extension for access services on Kubernetes easily.
 
