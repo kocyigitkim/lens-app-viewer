@@ -9,6 +9,7 @@ import { GiCubeforce } from "react-icons/gi";
 import stringSimilarity from "string-similarity";
 import { VscEdit, VscSave } from "react-icons/vsc";
 import { AiFillDelete } from "react-icons/ai";
+import {ImCancelCircle} from 'react-icons/im';
 
 import {
   ClusterServiceSettings,
@@ -44,6 +45,11 @@ export default class AppViewerPage extends React.Component {
     this.settings.save();
     this.setState({ canEdit: false, loading: false });
   }
+  cancelChanges() {
+    this.setState({ loading: true, canEdit: false });
+    this.settings.reload();
+    this.setState({ loading: false });
+  }
   edit() {
     this.setState({ canEdit: true });
   }
@@ -54,10 +60,12 @@ export default class AppViewerPage extends React.Component {
       (p) => p.Id == Helper.getCurrentClusterId()
     )[0];
     cluster.Services = cluster.Services.filter((p) => p.Id !== item.Id);
+    data.Clusters = [...data.Clusters];
     panel.settings.data = data;
-    panel.settings.save();
 
-    panel.setState({ loading: false });
+    panel.setState({ loading: false }, () => {
+      panel.forceUpdate();
+    });
   }
   render() {
     var items: ClusterServiceSettings[];
@@ -87,18 +95,24 @@ export default class AppViewerPage extends React.Component {
             <h3 style={{ flex: 1 }}>App Viewer</h3>
             <div className="module_bootstrap">
               {this.state.canEdit ? (
-                <Button
-                  onClick={this.saveChanges.bind(this)}
-                  variant="outline-success"
-                >
-                  <VscSave size={24} /> Save
-                </Button>
+                <div>
+                  <Button variant="outline-danger" onClick={this.cancelChanges.bind(this)} style={{margin: 3}}>
+                    <ImCancelCircle style={{margin: 'auto'}} size={24} /> Cancel
+                  </Button>
+                  <Button
+                    onClick={this.saveChanges.bind(this)}
+                    variant="outline-success"
+                    style={{margin: 3}}
+                  >
+                    <VscSave  style={{margin: 'auto'}} size={24} /> Save
+                  </Button>
+                </div>
               ) : (
                 <Button
                   onClick={this.edit.bind(this)}
                   variant="outline-secondary"
                 >
-                  <VscEdit size={24} /> Edit
+                  <VscEdit  style={{margin: 'auto'}} size={24} /> Edit
                 </Button>
               )}
             </div>
@@ -155,6 +169,7 @@ class AppItem extends React.Component {
   state = {
     loading: false,
     icon: null as string,
+    id: null as string,
   };
   async portForward() {
     this.setState({ loading: true });
@@ -234,7 +249,7 @@ class AppItem extends React.Component {
             .filter((p) => p.url.endsWith(".png"))
             .map((p) => p.url)[0];
         }
-        console.log("MATCHED", matched);
+
         if (matched) {
           this.setState({
             icon: await Helper.cacheLogo(id, matched)
@@ -250,6 +265,12 @@ class AppItem extends React.Component {
   }
   componentDidMount() {
     this.loadLogo.call(this);
+  }
+  componentDidUpdate() {
+    if (this.props.item.Id !== this.state.id) {
+      this.setState({ id: this.props.item.Id, icon: null });
+      this.loadLogo.call(this);
+    }
   }
   render() {
     const item = this.props.item;
@@ -270,7 +291,10 @@ class AppItem extends React.Component {
             }}
           >
             {canEdit && (
-              <div style={{ padding: 10, textAlign:'right' }} className="module_bootstrap">
+              <div
+                style={{ padding: 10, textAlign: "right" }}
+                className="module_bootstrap"
+              >
                 <Button
                   onClick={this.props.onDelete.bind(
                     this,
@@ -280,7 +304,7 @@ class AppItem extends React.Component {
                   variant="danger"
                   style={{ textAlign: "center" }}
                 >
-                  <AiFillDelete size={24} /> Delete
+                  <AiFillDelete  style={{margin: 'auto'}} size={24} /> Delete
                 </Button>
               </div>
             )}
