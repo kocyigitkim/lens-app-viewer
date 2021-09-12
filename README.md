@@ -1,5 +1,5 @@
 # What is App Viewer?
-An extension for access services on Kubernetes easily.
+An extension for access services on Lens Ide easily.
 
 # Installation
 ### 1 - Open Extensions Page
