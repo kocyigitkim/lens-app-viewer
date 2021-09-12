@@ -31,6 +31,6 @@ An extension for access services on Kubernetes easily.
 All is that :)
 
 # What is Next?
-## 1 - View App secrets after open (optional)
-## 2 - App Online Status
-## 3 - Order & Group Apps
+> - View App secrets after open (optional)
+> - App Online Status
+> - Order & Group Apps
