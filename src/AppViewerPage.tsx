@@ -1,22 +1,19 @@
-import { Common, Main, Renderer } from "@k8slens/extensions";
-import cluster from "cluster";
-import React, { useState } from "react";
-import { Helper } from "../Helper";
-import { FcInfo } from "react-icons/fc";
+import { Common } from "@k8slens/extensions";
 import gis from "g-i-s";
-import Loading from "./Loading";
-import { GiCubeforce } from "react-icons/gi";
-import stringSimilarity from "string-similarity";
-import { VscEdit, VscSave } from "react-icons/vsc";
+import React from "react";
+import { Button } from "react-bootstrap";
 import { AiFillDelete } from "react-icons/ai";
-import {ImCancelCircle} from 'react-icons/im';
-
+import { GiCubeforce } from "react-icons/gi";
+import { ImCancelCircle } from "react-icons/im";
+import { VscEdit, VscSave } from "react-icons/vsc";
+import { Helper } from "../Helper";
 import {
   ClusterServiceSettings,
   ClusterSettings,
-  SettingsEditor,
+  SettingsEditor
 } from "../SettingsEditor";
-import { Toast, Button, Alert, Row, Col } from "react-bootstrap";
+import Loading from "./Loading";
+
 
 export default class AppViewerPage extends React.Component {
   props: {
@@ -96,15 +93,20 @@ export default class AppViewerPage extends React.Component {
             <div className="module_bootstrap">
               {this.state.canEdit ? (
                 <div>
-                  <Button variant="outline-danger" onClick={this.cancelChanges.bind(this)} style={{margin: 3}}>
-                    <ImCancelCircle style={{margin: 'auto'}} size={24} /> Cancel
+                  <Button
+                    variant="outline-danger"
+                    onClick={this.cancelChanges.bind(this)}
+                    style={{ margin: 3 }}
+                  >
+                    <ImCancelCircle style={{ margin: "auto" }} size={24} />{" "}
+                    Cancel
                   </Button>
                   <Button
                     onClick={this.saveChanges.bind(this)}
                     variant="outline-success"
-                    style={{margin: 3}}
+                    style={{ margin: 3 }}
                   >
-                    <VscSave  style={{margin: 'auto'}} size={24} /> Save
+                    <VscSave style={{ margin: "auto" }} size={24} /> Save
                   </Button>
                 </div>
               ) : (
@@ -112,7 +114,7 @@ export default class AppViewerPage extends React.Component {
                   onClick={this.edit.bind(this)}
                   variant="outline-secondary"
                 >
-                  <VscEdit  style={{margin: 'auto'}} size={24} /> Edit
+                  <VscEdit style={{ margin: "auto" }} size={24} /> Edit
                 </Button>
               )}
             </div>
@@ -175,17 +177,21 @@ class AppItem extends React.Component {
     this.setState({ loading: true });
     const item = this.props.item;
     const cluster = this.props.cluster;
-    const apiPath = `/api/pods/${item.Namespace}/service/${item.ServiceName}/port-forward/${item.Port.port}`;
-    const apiUrl = `http://localhost:${location.port}`;
+    const apiPath = `/api/pods/port-forward/${item.Namespace}/service/${item.ServiceName}?port=${item.Port.port}&forwardPort=0`;
+    const apiUrl = `http://${cluster.Id}.localhost:${location.port}`;
     try {
       var result = await fetch(apiUrl + apiPath, {
         method: "post",
         headers: {
-          Host: `${cluster.Id}.localhost:${location.port}`,
           "Content-Type": "application/json",
         },
       })
-        .then((p) => p.json())
+        .then((p) =>
+          p.json().then((res) => {
+            console.log(res);
+            Common.Util.openExternal(`http://localhost:${res.port}`);
+          })
+        )
         .catch(console.error);
     } catch (error) {
       console.error(error);
@@ -304,7 +310,7 @@ class AppItem extends React.Component {
                   variant="danger"
                   style={{ textAlign: "center" }}
                 >
-                  <AiFillDelete  style={{margin: 'auto'}} size={24} /> Delete
+                  <AiFillDelete style={{ margin: "auto" }} size={24} /> Delete
                 </Button>
               </div>
             )}
